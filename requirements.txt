@@ -1,0 +1,3 @@
+# TaskCore - Filesystem-based task queue
+# This package only uses Python standard library modules
+# No external dependencies required
