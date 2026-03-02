@@ -96,9 +96,10 @@ class FileSystemTaskQueue:
         
     
 class TaskQueueClient:
-    def __init__(self, queue: FileSystemTaskQueue):
+    def __init__(self, queue: FileSystemTaskQueue, timeout: int = 60*60*4):
         self.queue = queue
         self.current_task_file = None
+        self.timeout = 60*60*4
 
     def num_pending_tasks(self) -> int:
         return self.queue.num_pending_tasks()
@@ -116,7 +117,7 @@ class TaskQueueClient:
     def fetch_task(self):
         if self.current_task_file is not None:
             raise RuntimeError("A task is already fetched. Finish or release it before fetching another.")
-        self.queue.reclaim_stale_tasks(60*60*4)  # Reclaim stale tasks before fetching
+        self.queue.reclaim_stale_tasks(self.timeout)  # Reclaim stale tasks before fetching
         task_file = self.queue.fetch_task()
         if task_file:
             self.current_task_file = task_file
@@ -156,9 +157,9 @@ def dummy_run_func(*args,**kwargs):
     pass
 
 class FileSystemTaskQueueClient(TaskQueueClient):
-    def __init__(self,base_dir: str, rank: int = 0):
+    def __init__(self,base_dir: str, rank: int = 0, timeout: int = 60*60*4):
         self.queue = FileSystemTaskQueue(base_dir)
-        super().__init__(self.queue)
+        super().__init__(self.queue, timeout)
         self.rank = rank
 
     def add_task(self, task_dict: Dict):
