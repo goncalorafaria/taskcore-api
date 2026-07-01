@@ -61,6 +61,30 @@ while queue.fetch_and_run_task(init_func=init_function, func=run_function):
     pass
 ```
 
+### SQLite Backend
+
+TaskCore also provides an SQLite backend for users who want transactional task
+claims, indexed status queries, and simpler stale-task recovery:
+
+```python
+from taskcore import SQLiteTaskQueueClient
+
+queue = SQLiteTaskQueueClient("/path/to/task/directory")
+
+task_id = queue.add_task({
+    "learning_rate": 1e-4,
+    "batch_size": 32,
+})
+
+while queue.fetch_and_run_task(init_func=init_function, func=run_function):
+    pass
+```
+
+The filesystem backend remains available as `FileSystemTaskQueueClient` and keeps
+the inspectable `pending/`, `running/`, and `finished/` JSON-file layout. The
+SQLite backend stores tasks in `taskcore.sqlite3`; inspect it through the Python
+API, the CLI, or SQL queries rather than by reading task JSON files directly.
+
 ### Multi-Process Example
 
 ```python
@@ -121,7 +145,14 @@ for lr in learning_rates:
 
 ### FileSystemTaskQueueClient
 
-The main client class for interacting with the task queue.
+The filesystem client class. Use this backend when you want the traditional
+`pending/`, `running/`, and `finished/` directories with one JSON file per task.
+
+### SQLiteTaskQueueClient
+
+The SQLite client class. It supports the same high-level task lifecycle methods
+as `FileSystemTaskQueueClient`, but stores task state in `taskcore.sqlite3`
+instead of status directories.
 
 #### Constructor
 
@@ -178,13 +209,38 @@ Check if a task is currently being processed.
 
 ## Directory Structure
 
-TaskCore creates the following directory structure:
+The filesystem backend creates the following directory structure:
 
 ```
 base_dir/
 ├── pending/     # Tasks waiting to be processed
 ├── running/     # Tasks currently being processed
 └── finished/    # Completed tasks
+```
+
+The SQLite backend stores its database at:
+
+```
+base_dir/
+└── taskcore.sqlite3
+```
+
+## CLI
+
+The CLI can show status for either backend:
+
+```bash
+python -m taskcore.cli /path/to/tasks status
+python -m taskcore.cli /path/to/tasks show
+```
+
+By default, the CLI infers the backend. If `pending/`, `running/`, or
+`finished/` exists, it uses the filesystem backend. Otherwise, if
+`taskcore.sqlite3` exists, it uses SQLite. You can override inference explicitly:
+
+```bash
+python -m taskcore.cli /path/to/tasks show --backend=sqlite
+python -m taskcore.cli /path/to/tasks show --backend=filesystem
 ```
 
 ## Environment Variables

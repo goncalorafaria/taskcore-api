@@ -7,8 +7,8 @@ with open("requirements.txt", "r") as fr:
     installation_requirements = fr.readlines()
 
 setuptools.setup(
-    name="taskcore",
-    version="0.0.1",
+    name="taskcore-lib",
+    version="0.0.2",
     author="Goncalo Faria",
     author_email="gfaria@cs.washington.edu",
     description="Package for basic task queue in the filesystem.",

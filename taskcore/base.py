@@ -99,7 +99,7 @@ class TaskQueueClient:
     def __init__(self, queue: FileSystemTaskQueue, timeout: int = 60*60*4):
         self.queue = queue
         self.current_task_file = None
-        self.timeout = 60*60*4
+        self.timeout = timeout
 
     def num_pending_tasks(self) -> int:
         return self.queue.num_pending_tasks()
