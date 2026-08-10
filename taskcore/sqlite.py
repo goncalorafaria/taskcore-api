@@ -134,7 +134,8 @@ class SQLiteTaskQueue:
             conn.execute("COMMIT")
             return task_id
         except Exception:
-            conn.execute("ROLLBACK")
+            if conn.in_transaction:
+                conn.execute("ROLLBACK")
             raise
         finally:
             conn.close()

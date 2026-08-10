@@ -158,9 +158,10 @@ instead of status directories.
 
 ```python
 FileSystemTaskQueueClient(base_dir: str, rank: int = 0)
+SQLiteTaskQueueClient(base_dir: str, rank: int = 0)
 ```
 
-- `base_dir`: Directory where task files are stored
+- `base_dir`: Directory where task files or the SQLite database are stored
 - `rank`: Process rank for multi-process setups (default: 0)
 
 #### Methods
